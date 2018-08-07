@@ -1,0 +1,18 @@
+{
+    "activateSound": true, 
+    "displayLights": "default", 
+    "greasePencils": true, 
+    "grid": false, 
+    "imagePlane": true, 
+    "lastUserPlayblastPath": "C:\\Users\\antonio\\AppData\\Local\\Temp\\blast3.mov", 
+    "lightsOn": false, 
+    "locators": false, 
+    "manipulators": false, 
+    "motionTrails": false, 
+    "nurbsCurves": false, 
+    "offscreen": true, 
+    "scale": 70, 
+    "shadows": false, 
+    "showOrnaments": 0, 
+    "sound": null
+}
