@@ -13,6 +13,6 @@
     "offscreen": true, 
     "scale": 70, 
     "shadows": false, 
-    "showOrnaments": 0, 
+    "showOrnaments": false, 
     "sound": null
 }
