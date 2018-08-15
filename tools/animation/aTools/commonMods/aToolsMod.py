@@ -230,7 +230,7 @@ def getaToolsPath(level=1, inScriptsFolder=True):
         mayaAppDir      = mel.eval('getenv MAYA_APP_DIR')
         #scriptsDir      = "%s%sscripts%s"%(mayaAppDir, os.sep, os.sep)
         #aToolsFolder    = "%s%saTools%s"%(scriptsDir, os.sep, os.sep)
-        scriptsDir      = r'P:\TOOLS\BM2Public\tools\animation\aTools'
+        scriptsDir      = r'P:\TOOLS\BM2Public\tools\animation'
         aToolsFolder    = r'P:\TOOLS\BM2Public\tools\animation\aTools'
 
         if level==1: return aToolsFolder
