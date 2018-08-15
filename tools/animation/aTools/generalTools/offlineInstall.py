@@ -23,7 +23,7 @@ def formatPath(path):
     return path
 
 def download(downloadUrl, saveFile):
-    
+    return
     if not hasInternet(downloadUrl): 
         cmds.warning('Error trying to install.')
         return
@@ -66,7 +66,7 @@ def download(downloadUrl, saveFile):
 
 
 def aToolsOfflineInstall(offlineFilePath):
-
+    return
     mayaAppDir      = mel.eval('getenv MAYA_APP_DIR')    
     aToolsPath      = mayaAppDir + os.sep + 'scripts'
     aToolsFolder    = aToolsPath + os.sep + 'aTools' + os.sep
