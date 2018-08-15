@@ -355,7 +355,7 @@ class Update(object):
 
         
     def tryUpdate(self):
-        return True   
+        return False
 
     def checkUpdates(self, gui, layout, *args):        
 
@@ -386,6 +386,7 @@ class Update(object):
 
     
     def updateaTools(self, downloadUrl, offline=None, *args):
+        return
         
         aToolsPath      = aToolsMod.getaToolsPath(2)
         aToolsFolder    = aToolsMod.getaToolsPath()
@@ -433,6 +434,7 @@ class Update(object):
     
        
     def hasUpdate(self):
+        return False
         
         response = None 
         
@@ -473,6 +475,7 @@ class Update(object):
         return False
     
     def warnUpdate(self):
+        return
             
         if G.GT_wasUpdated:
             G.GT_wasUpdated  = None            
