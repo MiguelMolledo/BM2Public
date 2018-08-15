@@ -20,14 +20,14 @@ from BM2Public.tools.animation.aTools.generalTools.aToolsGlobals import aToolsGl
 from BM2Public.tools.animation.aTools.commonMods import utilMod
 from BM2Public.tools.animation.aTools.commonMods import aToolsMod
 
-def install(offline=None, unistall=False):    
+def install(offline=None, unistall=False):
     return
     mayaAppDir      = mel.eval('getenv MAYA_APP_DIR')
-    scriptsDir      = "%s%sscripts"%(mayaAppDir, os.sep)
-    userSetupFile   = scriptsDir + os.sep + "userSetup.py"  
+    scriptsDir      = mayaAppDir + os.sep + '2017' + os.sep + "scripts"
+    userSetupFile   = scriptsDir + os.sep + "userSetup.py"
     newUserSetup    = ""  
     
-    
+    '''
     try:
         with open(userSetupFile, 'r'):
             
@@ -68,7 +68,7 @@ def install(offline=None, unistall=False):
         aToolsMod.saveInfoWithUser("userPrefs", "offlinePath", [offlineFolder, fileModTime]) 
         if createMelFile == True: createOfflineMelFile(offlineFolder, scriptsDir)
     
-    
+    '''
     #open tool
     if not unistall:
         from BM2Public.tools.animation.aTools.animTools.animBar import animBarUI; reload(animBarUI)
@@ -77,6 +77,7 @@ def install(offline=None, unistall=False):
         
         
 def createOfflineMelFile(offlineFolder, scriptsDir):
+    return
     filePath            = "%s%saTools_offline_install.mel"%(offlineFolder, os.sep)
     offlineInstallPy    = "%s%saTools%sgeneralTools%sofflineInstall.py"%(scriptsDir, os.sep, os.sep, os.sep)
     pyContents          = "\\n\\".join(utilMod.readFile(offlineInstallPy))
