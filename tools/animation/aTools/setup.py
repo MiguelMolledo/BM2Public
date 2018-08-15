@@ -21,7 +21,7 @@ from BM2Public.tools.animation.aTools.commonMods import utilMod
 from BM2Public.tools.animation.aTools.commonMods import aToolsMod
 
 def install(offline=None, unistall=False):    
-       
+    return
     mayaAppDir      = mel.eval('getenv MAYA_APP_DIR')
     scriptsDir      = "%s%sscripts"%(mayaAppDir, os.sep)
     userSetupFile   = scriptsDir + os.sep + "userSetup.py"  
