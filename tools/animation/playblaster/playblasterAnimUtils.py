@@ -1,6 +1,6 @@
 import maya.cmds as cmds
 import maya.mel as mel
-import playblasterUI
+import playblasterClass
 import os
 
 
@@ -9,8 +9,8 @@ def changeRotateOrder(newRotateOrder, *args):
     cmds.refresh(suspend=True)
     selection = cmds.ls(sl=True)
     if selection:
-        scriptPath = (os.path.dirname(playblasterUI.__file__)+ '/zooChangeRoo.mel').replace('\\','/')
-        scriptUtilsPath = (os.path.dirname(playblasterUI.__file__)+ '/zooUtils.mel').replace('\\','/')
+        scriptPath = (os.path.dirname(playblasterClass.__file__)+ '/zooChangeRoo.mel').replace('\\','/')
+        scriptUtilsPath = (os.path.dirname(playblasterClass.__file__)+ '/zooUtils.mel').replace('\\','/')
         mel.eval('source "%s"' % scriptPath)
         mel.eval('source "%s"' % scriptUtilsPath)
         mel.eval("zooChangeRoo " + newRotateOrder)
