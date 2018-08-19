@@ -5,10 +5,10 @@ import os
 
 
 def changeRotateOrder(newRotateOrder, *args):
-    keyInRange(atributes='rotate')
-    cmds.refresh(suspend=True)
     selection = cmds.ls(sl=True)
     if selection:
+        keyInRange(atributes='rotate')
+        cmds.refresh(suspend=True)        
         scriptPath = (os.path.dirname(playblasterClass.__file__)+ '/zooChangeRoo.mel').replace('\\','/')
         scriptUtilsPath = (os.path.dirname(playblasterClass.__file__)+ '/zooUtils.mel').replace('\\','/')
         mel.eval('source "%s"' % scriptPath)
@@ -27,7 +27,7 @@ def keyInRange(atributes='all',*args):
 
     selection = cmds.ls(sl=True)
     if selection:
-
+        
         keysInFrames=cmds.keyframe(selection, time=(start,end), query=True)
         simplifiedList=[]
 
@@ -43,7 +43,8 @@ def keyInRange(atributes='all',*args):
                 cmds.setKeyframe()
             else:
                 cmds.setKeyframe(at=atributes)
-
+                
+        cmds.currentTime(cmds.findKeyframe(timeSlider=True, which="next"), edit=True)        
     else:
         cmds.warning('there is no object selected')
 
