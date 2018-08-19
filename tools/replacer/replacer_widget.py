@@ -28,7 +28,7 @@ class replacerWidget(form, base):
 
     def connectSignals(self):
         #Si abres la ui veras que hay un botton BTN_ACEPTAR y un check box BTN_SELECTION
-        #lo unico que hacer aqui es conectar la señal clicked con la funcion a la que llama el boton
+        #lo unico que hacer aqui es conectar la senal clicked con la funcion a la que llama el boton
         self.BTN_ACEPTAR.clicked.connect(self._initProcess)
         self.BTN_SELECTION.clicked.connect(self._selection_mode)
         
