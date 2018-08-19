@@ -1,0 +1,11 @@
+
+copiar la carpeta en:
+
+P:\TOOLS\Framework\plugins
+
+ejecutar en maya pestaña python:
+
+from Framework.plugins.replacer import replacer_widget
+reload (replacer_widget)
+ui = replacer_widget.replacerWidget()
+ui.show()
