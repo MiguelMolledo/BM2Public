@@ -54,6 +54,8 @@ class playblaster(object):
         if cmds.panel('blasterCam', exists=True) and cmds.workspaceControl('playblaster', exists=True):
             cmds.workspaceControl('playblaster', restore=True, e=True)
             return 'window already exist'
+        else:
+            self.createUi()
 
     def checkJob(self):
         sesionJobs = cmds.scriptJob(lj=True)
@@ -111,19 +113,19 @@ class playblaster(object):
 
 
     def createUi(self):
-
-        if not cmds.workspaceControl('playblaster', exists=True):
-            blastWindow = cmds.workspaceControl('playblaster', label="playblaster",
-                                                uiScript= 'playblaster.playblaster.show',
-                                                initialWidth=355,
-                                                initialHeight=720,
-                                                wp='free',
-                                                loadImmediately=False,
-                                                hp='free',
-                                                rt=False,
-                                                )
-        else:
-            blastWindow = 'playblaster'
+        if cmds.workspaceControl('playblaster', exists=True):
+            cmds.deleteUI('playblaster')
+            
+        blastWindow = cmds.workspaceControl('playblaster', label="playblaster",
+                                            uiScript= 'playblaster.playblaster.show',
+                                            initialWidth=355,
+                                            initialHeight=720,
+                                            wp='free',
+                                            loadImmediately=False,
+                                            hp='free',
+                                            rt=False,
+                                            duplicatable=False
+                                            )
 
         # menu de opciones de la ventana, en funcion son 4 menus que van a permitir cambiar las opciones de formato
         menuLayout = cmds.menuBarLayout('playblasterMenuLayout', p=blastWindow)
