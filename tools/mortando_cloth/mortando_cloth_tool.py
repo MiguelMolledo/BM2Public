@@ -61,16 +61,17 @@ class MortandoCloth(form, base):
     def basic_blendshape (self):
         blendShape = cmds.blendShape("|mortando|geo", "input_connect|mortando|geo", name="anim_to_input", o="world")
         cmds.setAttr (blendShape[0]+".geo", 1)
-    
+        cmds.hide("|mortando|geo")
+
     def new_blendshape (self):
         name = self.blend_shape_frame.toPlainText()
         if name:
-            blendShape = cmds.blendShape("|mortando|geo", "input_connect|mortando|geo", name="anim_to_input_{0}".format(name), o="world")
-            cmds.setAttr (blendShape[0]+".geo", 1)
+            blendShape = cmds.blendShape("|cloth_rig|utils|correctives|mortando_geo_bodyFat_corrective", "|cloth_rig|input|input_finaling|mortando_geo_bodyFat", name="corrective_blendshape_{0}".format(name), o="world")
+            cmds.setAttr (blendShape[0]+".mortando_geo_bodyFat_corrective", 1)
         
     def reset (self):
         from maya import mel
-        from Framework.plugins.mortando_cloth import reset_code as rc
+        from BM2Public.tools.mortando_cloth import reset_code as rc
         mel.eval(rc.code)
             
     def logInShotgun (self):
@@ -128,6 +129,7 @@ class MortandoCloth(form, base):
         self._importAlembics ()
         self._renderSetting()
         self.basic_blendshape()
+        print "SAVIIIIIIIIIIIIIIIIIIIIING"
         self._saveShot()
         
     def _splitShotName (self):
@@ -194,7 +196,7 @@ class MortandoCloth(form, base):
             cmds.setAttr ("defaultResolution.height", 2202)
             
     def _saveShot (self):
-        
+        print ("SAVIIIING")
         directory = ( "P:/BM2/seq/{0}/sho/{1}/cloth/wip/".format(self.shotNumber, self.seqName))
         try:
             os.makedirs(directory)
