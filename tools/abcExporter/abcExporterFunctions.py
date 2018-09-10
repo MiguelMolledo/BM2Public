@@ -27,14 +27,14 @@ def abcWriter(startFrame,endFrame,description,flags=('uvWrite', 'worldSpace', 'w
         return None
 
 def keysAtStart(char):
-    ctl = cmds.ls(char + ':*ctl*', typ='transform')
+    ctl = cmds.ls(char + ':*ctl*', char + ':poses_1', typ='transform')
     firstFrame = cmds.findKeyframe(ctl, time=(25,25), which="next")
     for o in ctl:
         cmds.setKeyframe(o, t=firstFrame, rk=True, i=True)
 
 
 def zeroAtZero(char):
-    controls = cmds.ls(char + ':*ctl*', typ='transform')
+    controls = cmds.ls(char + ':*ctl*', char + ':poses_1', typ='transform')
     for ctl in controls:
         atributes=cmds.listAttr(ctl, k=True)
         for attr in atributes: 
