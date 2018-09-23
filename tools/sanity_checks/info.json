@@ -1,0 +1,7 @@
+{
+    "type": "script",
+    "code": "sanity_checks",
+    "category": "general",
+    "name": "Sanity Check",
+    "icon": "check.png"
+}
