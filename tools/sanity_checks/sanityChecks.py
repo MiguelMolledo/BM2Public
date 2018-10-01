@@ -9,11 +9,13 @@
 ##SANITY CHECKS FOR PROPS AND ELLEMENTS##
 #########################################
 
-
-import maya.mel as mel
-import maya.cmds as cmds
-import re
-
+try:
+    import maya.mel as mel
+    import maya.cmds as cmds
+    import re
+except Exception as e:
+    print e
+    print "IF its executed outsite of maya this imports fails"
 #Declaring some variables
 #def varDeclaration():
 
@@ -496,8 +498,8 @@ def createUI():
                 sizeable = True,
                 resizeToFitChildren = True)
     cmds.scrollLayout(
-	    horizontalScrollBarThickness=16,
-	    verticalScrollBarThickness=16)
+        horizontalScrollBarThickness=16,
+        verticalScrollBarThickness=16)
 
     #################################
     # Begin ANALITICS
