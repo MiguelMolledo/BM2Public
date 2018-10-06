@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/animation.iml" filepath="$PROJECT_DIR$/.idea/animation.iml" />
+      <module fileurl="file://E:/lsdFramework/.idea/laSedaFramework.iml" filepath="E:/lsdFramework/.idea/laSedaFramework.iml" />
     </modules>
   </component>
 </project>

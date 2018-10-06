@@ -5,6 +5,8 @@ import maya.cmds as cmds
 import playblasterClass 
 import shotgun_api3 as sapi 
 from Framework.plugins.dependency_uploader.uploader_window import UploaderBackgroundWidget 
+from Framework.plugins.file_manager.settings import CustomSettings
+
  
  
  
@@ -12,13 +14,14 @@ def sendToCheck(filePath):
  
     userCheck = cmds.confirmDialog(db='ok', b= ['ok', 'cancel'], cb='cancel', t="Warning: ", m="it's about to send playblast and scene to review, \nThe scene will be saved, are you sure??") 
     if userCheck == 'ok': 
-        fileInfo = pipeInfo() 
+        fileInfo = pipeInfo()
         sceneFullName = fileInfo['folder'] + fileInfo['fileName'] + fileInfo['extension']    
         chkFullName = getPaths(description=fileInfo['description'], fileType='scene', prodState='chk') 
-  
         cmds.file(save=True) 
         shutil.copy(sceneFullName, chkFullName) 
         sendToDropbox([filePath, chkFullName],4) 
+
+        createShotgunVersion(shotName=fileInfo['seq'] + '.' + fileInfo['shot'], movieFilePath= filePath, description=None, department='Animation', shotgunWeb = "https://esdip.shotgunstudio.com", project = 'b&m2')
  
     else: 
         print 'send to review canceled',
@@ -106,8 +109,45 @@ def getShotgunRange():
             return None 
          
         return shotRange 
+
  
+def createShotgunVersion(shotName, movieFilePath, description, department='Animation', shotgunWeb = "https://esdip.shotgunstudio.com", project = 'b&m2'):
+    settings = CustomSettings("BM2", "FileManager")
+    user=settings["userName"]
+    userName=settings["login"]
+    loginPassword=settings["password"]
+    
+    sg = sapi.Shotgun(shotgunWeb, 
+                      login= userName, 
+                      password= loginPassword)
+
+    shotgunProjectInfo = sg.find_one("Project", [['name', 'is', project]])    
+
+    shotInfoFilters = [ ['project', 'is', {'type': 'Project','id': shotgunProjectInfo['id']}],
+                ['code', 'is', shotName] ]
+    shotgunShotInfo = sg.find_one('Shot', shotInfoFilters)
+    
+    taskInfoFiltersfilters = [ ['project', 'is', {'type': 'Project', 'id': shotgunProjectInfo['id']}],
+                ['entity', 'is',{'type':'Shot', 'id': shotgunShotInfo['id']}],
+                ['content', 'is', department] ]
+    shotgunTaskInfo = sg.find_one('Task', taskInfoFiltersfilters)
+
+    userInfofilters = [ ['login', 'is', userName] ]
+    shotgunUserInfo = sg.find_one('HumanUser', userInfofilters)
+
+    versionFilters = { 'project': {'type': 'Project','id': shotgunProjectInfo['id']},
+                       'description': 'version to review',
+                       'sg_status_list': 'rev',
+                       'entity': {'type': 'Shot', 'id': shotgunShotInfo['id']},
+                       'sg_task': {'type': 'Task', 'id': shotgunTaskInfo['id']},
+                       'code': os.path.basename(movieFilePath),
+                       'user': {'type': 'HumanUser', 'id': shotgunUserInfo['id']} }
+    shotgunVersionInfo = sg.create('Version', versionFilters)
+    
+    fileUploaded =sg.upload("Version", shotgunVersionInfo['id'], movieFilePath,'sg_uploaded_movie')
  
+    print 'new version was created',
+
  
 def pipeInfo(path=None): 
     '''chekea que el archivo este en pipe y pertenezca a alguno de los projectos. 
@@ -209,7 +249,6 @@ def confirm(path=None, incrementalOption=False, message=None):
                 return path 
     else: 
         return None 
- 
  
  
 class jsonEditor(object): 
@@ -320,3 +359,4 @@ class modifyDescriptionPrompt(object):
  
  
 '''
+
