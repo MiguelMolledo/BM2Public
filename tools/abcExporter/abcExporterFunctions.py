@@ -1,5 +1,6 @@
 import os
 import sys
+import shutil 
 import maya.cmds as cmds
 import BM2Public.tools.animation.playblaster.playblasterFunctions as playblasterFunctions
 import abcExporterUI as abcExporterUI 
@@ -174,6 +175,11 @@ def importCacheToScene(*args):
             cmds.file(cachesFiles[o], i=True, type="Alembic", ignoreVersion=True, mergeNamespacesOnClash= False, namespace= o+'Exported', pr= True)
 
 
+def removeCachesInScene():
+    cachesToClean=[x for x in cmds.namespaceInfo(lon=True) if 'Exported' in x]
+    for cache in cachesToClean:
+        cmds.namespace( dnc=True,rm=cache)
+
 def publishSelectedCaches(*args):
     cachesdict=readCachesInDisk()
     filestoQueu=[]
@@ -184,6 +190,13 @@ def publishSelectedCaches(*args):
 
     userChoice = cmds.confirmDialog(db='ok', b= ['ok', 'cancel'], cb='cancel', t="Warning:", m=" it's about to publish this caches: " + ', '.join(selection) + ", \nare you sure??")
     if userChoice == 'ok':
+        removeCachesInScene()
+        cmds.file(save=True)
+        fileInfo = playblasterFunctions.pipeInfo() 
+        sceneFullName = fileInfo['folder'] + fileInfo['fileName'] + fileInfo['extension']    
+        outFullName = playblasterFunctions.getPaths(description=fileInfo['description'], fileType='scene', prodState='out')  
+        shutil.copy(sceneFullName, outFullName) 
+        filestoQueu.append(outFullName)
         playblasterFunctions.sendToDropbox(filestoQueu,4)
         
 

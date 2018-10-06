@@ -37,18 +37,18 @@ def keyInRange(atributes='all',*args):
 
         simplifiedList.sort()
 
-        for o in range(len(simplifiedList)):
-            cmds.currentTime(cmds.findKeyframe(timeSlider=True, which="next"), edit=True)
+        for o in simplifiedList:
+            cmds.currentTime(o, edit=True)
             if atributes == 'all':
                 cmds.setKeyframe()
             else:
                 cmds.setKeyframe(at=atributes)
                 
-        cmds.currentTime(cmds.findKeyframe(timeSlider=True, which="next"), edit=True)        
+        cmds.currentTime(simplifiedList[0], edit=True)        
     else:
         cmds.warning('there is no object selected')
 
-    cmds.refresh(suspend=False)        
+    cmds.refresh(suspend=False)    
 
 
 def stepTangents(*args):
