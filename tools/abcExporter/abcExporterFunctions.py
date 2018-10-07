@@ -1,5 +1,6 @@
 import os
 import sys
+import shutil 
 import maya.cmds as cmds
 import BM2Public.tools.animation.playblaster.playblasterFunctions as playblasterFunctions
 import abcExporterUI as abcExporterUI 
@@ -27,14 +28,14 @@ def abcWriter(startFrame,endFrame,description,flags=('uvWrite', 'worldSpace', 'w
         return None
 
 def keysAtStart(char):
-    ctl = cmds.ls(char + ':*ctl*', typ='transform')
+    ctl = cmds.ls(char + ':*ctl*', char + ':poses_1', typ='transform')
     firstFrame = cmds.findKeyframe(ctl, time=(25,25), which="next")
     for o in ctl:
         cmds.setKeyframe(o, t=firstFrame, rk=True, i=True)
 
 
 def zeroAtZero(char):
-    controls = cmds.ls(char + ':*ctl*', typ='transform')
+    controls = cmds.ls(char + ':*ctl*', char + ':poses_1', typ='transform')
     for ctl in controls:
         atributes=cmds.listAttr(ctl, k=True)
         for attr in atributes: 
@@ -174,6 +175,11 @@ def importCacheToScene(*args):
             cmds.file(cachesFiles[o], i=True, type="Alembic", ignoreVersion=True, mergeNamespacesOnClash= False, namespace= o+'Exported', pr= True)
 
 
+def removeCachesInScene():
+    cachesToClean=[x for x in cmds.namespaceInfo(lon=True) if 'Exported' in x]
+    for cache in cachesToClean:
+        cmds.namespace( dnc=True,rm=cache)
+
 def publishSelectedCaches(*args):
     cachesdict=readCachesInDisk()
     filestoQueu=[]
@@ -184,6 +190,13 @@ def publishSelectedCaches(*args):
 
     userChoice = cmds.confirmDialog(db='ok', b= ['ok', 'cancel'], cb='cancel', t="Warning:", m=" it's about to publish this caches: " + ', '.join(selection) + ", \nare you sure??")
     if userChoice == 'ok':
+        removeCachesInScene()
+        cmds.file(save=True)
+        fileInfo = playblasterFunctions.pipeInfo() 
+        sceneFullName = fileInfo['folder'] + fileInfo['fileName'] + fileInfo['extension']    
+        outFullName = playblasterFunctions.getPaths(description=fileInfo['description'], fileType='scene', prodState='out')  
+        shutil.copy(sceneFullName, outFullName) 
+        filestoQueu.append(outFullName)
         playblasterFunctions.sendToDropbox(filestoQueu,4)
         
 

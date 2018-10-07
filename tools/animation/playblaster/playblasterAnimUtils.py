@@ -1,16 +1,16 @@
 import maya.cmds as cmds
 import maya.mel as mel
-import playblasterUI
+import playblasterClass
 import os
 
 
 def changeRotateOrder(newRotateOrder, *args):
-    keyInRange(atributes='rotate')
-    cmds.refresh(suspend=True)
     selection = cmds.ls(sl=True)
     if selection:
-        scriptPath = (os.path.dirname(playblasterUI.__file__)+ '/zooChangeRoo.mel').replace('\\','/')
-        scriptUtilsPath = (os.path.dirname(playblasterUI.__file__)+ '/zooUtils.mel').replace('\\','/')
+        keyInRange(atributes='rotate')
+        cmds.refresh(suspend=True)        
+        scriptPath = (os.path.dirname(playblasterClass.__file__)+ '/zooChangeRoo.mel').replace('\\','/')
+        scriptUtilsPath = (os.path.dirname(playblasterClass.__file__)+ '/zooUtils.mel').replace('\\','/')
         mel.eval('source "%s"' % scriptPath)
         mel.eval('source "%s"' % scriptUtilsPath)
         mel.eval("zooChangeRoo " + newRotateOrder)
@@ -27,7 +27,7 @@ def keyInRange(atributes='all',*args):
 
     selection = cmds.ls(sl=True)
     if selection:
-
+        
         keysInFrames=cmds.keyframe(selection, time=(start,end), query=True)
         simplifiedList=[]
 
@@ -37,17 +37,18 @@ def keyInRange(atributes='all',*args):
 
         simplifiedList.sort()
 
-        for o in range(len(simplifiedList)):
-            cmds.currentTime(cmds.findKeyframe(timeSlider=True, which="next"), edit=True)
+        for o in simplifiedList:
+            cmds.currentTime(o, edit=True)
             if atributes == 'all':
                 cmds.setKeyframe()
             else:
                 cmds.setKeyframe(at=atributes)
-
+                
+        cmds.currentTime(simplifiedList[0], edit=True)        
     else:
         cmds.warning('there is no object selected')
 
-    cmds.refresh(suspend=False)        
+    cmds.refresh(suspend=False)    
 
 
 def stepTangents(*args):
