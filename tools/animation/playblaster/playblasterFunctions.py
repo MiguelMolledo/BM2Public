@@ -113,15 +113,24 @@ def getShotgunRange():
  
 def createShotgunVersion(shotName, movieFilePath, description, department='Animation', shotgunWeb = "https://esdip.shotgunstudio.com", project = 'b&m2'):
     settings = CustomSettings("BM2", "FileManager")
-    user=settings["userName"]
     userName=settings["login"]
-    loginPassword=settings["password"]
     
-    sg = sapi.Shotgun(shotgunWeb, 
-                      login= userName, 
-                      password= loginPassword)
-
-    shotgunProjectInfo = sg.find_one("Project", [['name', 'is', project]])    
+    try:
+        loginPassword=settings["password"]
+        sg = sapi.Shotgun(shotgunWeb, 
+                           login=userName, 
+                           password=loginPassword) 
+                           
+        shotgunProjectInfo = sg.find_one("Project", [['name', 'is', project]])  
+    
+    except:
+        loginPassword=settings.value('password').rstrip()
+        sg = sapi.Shotgun(shotgunWeb, 
+                           login=userName, 
+                           password=loginPassword) 
+                           
+        shotgunProjectInfo = sg.find_one("Project", [['name', 'is', project]])  
+        
 
     shotInfoFilters = [ ['project', 'is', {'type': 'Project','id': shotgunProjectInfo['id']}],
                 ['code', 'is', shotName] ]
@@ -146,7 +155,7 @@ def createShotgunVersion(shotName, movieFilePath, description, department='Anima
     
     fileUploaded =sg.upload("Version", shotgunVersionInfo['id'], movieFilePath,'sg_uploaded_movie')
  
-    print 'new version was created',
+    print 'new version was created on shotgun',
 
  
 def pipeInfo(path=None): 
