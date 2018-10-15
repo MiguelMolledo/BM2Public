@@ -177,8 +177,9 @@ def importCacheToScene(*args):
 
 def removeCachesInScene():
     cachesToClean=[x for x in cmds.namespaceInfo(lon=True) if 'Exported' in x]
-    for cache in cachesToClean:
-        cmds.namespace( dnc=True,rm=cache)
+    if cachesToClean:
+        for cache in cachesToClean:
+            cmds.namespace( dnc=True,rm=cache)
 
 def publishSelectedCaches(*args):
     cachesdict=readCachesInDisk()
