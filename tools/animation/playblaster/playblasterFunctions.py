@@ -3,7 +3,7 @@ import os
 import shutil 
 import maya.cmds as cmds 
 import playblasterClass 
-import shotgun_api3 as sapi 
+from Framework.lib.ext_lib import shotgun_api3 as sapi
 from Framework.plugins.dependency_uploader.uploader_window import UploaderBackgroundWidget 
 from Framework.plugins.file_manager.settings import CustomSettings
 
