@@ -1,3 +1,4 @@
+"version 001"
 import os
 from Framework.lib.gui_loader import gui_loader
 from Framework.lib.ui.qt.QT import QtCore, QtWidgets, QtGui
