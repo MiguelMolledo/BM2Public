@@ -1,3 +1,4 @@
+"version 001"
 import os
 from Framework.lib.gui_loader import gui_loader
 from Framework.lib.ui.qt.QT import QtCore, QtWidgets, QtGui
@@ -7,7 +8,7 @@ form, base = gui_loader.load_ui_type(os.path.join(os.path.dirname(__file__), "ui
 import os
 from maya import mel
 from maya import cmds
-import shotgun_api3 as sapi
+from Framework.lib.ext_lib import shotgun_api3 as sapi
 from Framework.plugins.dependency_uploader.uploader_window import UploaderBackgroundWidget
 from Framework.plugins.file_manager.filetypes.folder import Folder
 
@@ -35,7 +36,6 @@ class MortandoCloth(form, base):
 
 
     def connectSignals(self):
-        print ("KK")
         self.aceptarButton.clicked.connect(self.publishShot)
         self.sequenceButton.currentIndexChanged.connect(self.refreshShotInfo)
         self.btn_reset_simulation.clicked.connect(self.reset)
@@ -46,7 +46,6 @@ class MortandoCloth(form, base):
     def export_wip (self):
         self._splitShotName()
         mel = "-frameRange {0} {1} -uvWrite -writeVisibility -dataFormat ogawa -root |cloth_rig|output|out_export|mortando|geo -file P:/bm2/seq/{2}/sho/{3}/cloth/wip/bm2_seqsho_seq_{2}_sho_{3}_cloth_mortando_main_wip.abc". format(0, self.cut_out, self.shotNumber, self.seqName)
-        print mel
         cmds.AbcExport (j=mel)
         
     def export_out (self):
@@ -61,17 +60,16 @@ class MortandoCloth(form, base):
     def basic_blendshape (self):
         blendShape = cmds.blendShape("|mortando|geo", "input_connect|mortando|geo", name="anim_to_input", o="world")
         cmds.setAttr (blendShape[0]+".geo", 1)
-        cmds.hide("|mortando|geo")
-
+    
     def new_blendshape (self):
         name = self.blend_shape_frame.toPlainText()
         if name:
-            blendShape = cmds.blendShape("|cloth_rig|utils|correctives|mortando_geo_bodyFat_corrective", "|cloth_rig|input|input_finaling|mortando_geo_bodyFat", name="corrective_blendshape_{0}".format(name), o="world")
-            cmds.setAttr (blendShape[0]+".mortando_geo_bodyFat_corrective", 1)
+            blendShape = cmds.blendShape("|mortando|geo", "input_connect|mortando|geo", name="anim_to_input_{0}".format(name), o="world")
+            cmds.setAttr (blendShape[0]+".geo", 1)
         
     def reset (self):
         from maya import mel
-        from BM2Public.tools.mortando_cloth import reset_code as rc
+        from Framework.plugins.mortando_cloth import reset_code as rc
         mel.eval(rc.code)
             
     def logInShotgun (self):
@@ -101,7 +99,7 @@ class MortandoCloth(form, base):
         self.shot_props = list()
         for n in range (0, len(self.shot_assets)):
             elem= self.sg.find('Asset', filters=[['code', "is", self.shot_assets[n]["name"]], ['project','is', {'type': 'Project','id': 86}]], fields=["code","sg_asset_type"])
-            if elem[0]["sg_asset_type"] == 'Character':
+            if elem[0]["sg_asset_type"] == '3D Character':
                 self.shot_chars.append(elem[0]["code"])
             elif elem[0]["sg_asset_type"] == 'Prop':
                 self.shot_props.append(elem[0]["code"])
@@ -129,7 +127,6 @@ class MortandoCloth(form, base):
         self._importAlembics ()
         self._renderSetting()
         self.basic_blendshape()
-        print "SAVIIIIIIIIIIIIIIIIIIIIING"
         self._saveShot()
         
     def _splitShotName (self):
@@ -169,14 +166,14 @@ class MortandoCloth(form, base):
         list_abc = self.remote_files(path)
         for n in range (0, len(list_abc)):
             abc_fields = self.split_fields(list_abc[n])
-            if abc_fields["extension"] == "abc":
+            if abc_fields["extension"] == "abc" and abc_fields['pipe']=="out":
                 abc_path = path + "/" + list_abc[n]
                 print "descargando {0}".format( abc_path)
                 self._downloadFromDropbox(abc_path)
                 node = cmds.AbcImport (abc_path, m="import" )
                 self.renamer(node, abc_fields["partition"])
     
-    def _importCamera (self):
+    def _importCamera(self):
         path = "P:/bm2/seq/{0}/sho/{1}/camera/out".format(self.shotNumber, self.seqName)
         list_camera = self.remote_files(path)
         for n in range (0, len(list_camera)):
@@ -185,7 +182,7 @@ class MortandoCloth(form, base):
                 if camera_fields["layer"]== "camera":
                     camera_path = path + "/" + list_camera[n]
                     self._downloadFromDropbox(camera_path)
-                    cmds.file( list_camera[n], reference=True, namespace=":")
+                    cmds.file(camera_path, reference=True, namespace=":")
     
     def _renderSetting (self):
         if self.cam_shake == False:
@@ -194,16 +191,16 @@ class MortandoCloth(form, base):
         elif self.cam_shake == True:
             cmds.setAttr ("defaultResolution.width", 3424)
             cmds.setAttr ("defaultResolution.height", 2202)
-            
+         
     def _saveShot (self):
-        print ("SAVIIIING")
+        
         directory = ( "P:/BM2/seq/{0}/sho/{1}/cloth/wip/".format(self.shotNumber, self.seqName))
         try:
             os.makedirs(directory)
         except:
             pass    
         file_path_list=[]
-        file_path_list.append( "P:/BM2/seq/{0}/sho/{1}/cloth/wip/bm2_shoscn_seq_{0}_sho_{1}_cfx_cloth_scene_wip.ma".format(self.shotNumber, self.seqName))
+        file_path_list.append( "P:/BM2/seq/{0}/sho/{1}/cloth/wip/bm2_seqsho_seq_{0}_sho_{1}_cloth_default_none_wip.0001.ma".format(self.shotNumber, self.seqName))
         listNodes = cmds.ls(type = 'unknown')
         cmds.delete(listNodes)
         cmds.file( rename=file_path_list[0] )
@@ -215,48 +212,51 @@ class MortandoCloth(form, base):
         x = uploader_background_widget.execute_upload_process()
         print x
         
-    def _downloadFromDropbox (self, path):
+    def _downloadFromDropbox(self, path=None):
+
         from Framework.plugins.dependency_loader.downloader import Downloader, DownloaderResponse
         from Framework.lib.ui.qt.QT import QtCore, QtWidgets, QtGui
-        print "estamos descargando {0}".format( path)
+        downloader = Downloader()
+        file_list = []
+        file_list.append(path)
         if os.path.isfile(path) == True:
-            print "estamos dentro del if del path" + path
-            print os.path.isfile(path)
-        else:
-            self.download_finished = False
-            downloader = Downloader()
-            file_list = []
-            file_list.append(path)
-            print file_list
-            downloader.set_files_to_process(file_list)
-            downloader.set_maxium_threads(1)
-            downloader.on_finish_download.connect(self.on_download_finished, QtCore.Qt.QueuedConnection)
-            downloader.start_download_process()
-            x = 0
-            while self.download_finished  == False:            
-                #if os.path.isfile(path) == False:
-                import time
-                x = x+1
-                time.sleep(10)
-                if x >= 10:
-                    break
-                print "Downloading {}....".format(path)
-                if self.download_finished:
-                    break
-                self.download_finished  = False
-                #elif os.path.isfile(path) == True: 
-                #    break
+            file_path_mtd = downloader._dpx.getFileMetadata(path)
+            local_size = os.path.getsize(path)
+            if local_size and int(local_size) == int(file_path_mtd.size):
+                print "ya existe {0} en local".format(path)
+                return
+        downloader.set_files_to_process(file_list)
+        downloader.set_maxium_threads(1)
+        downloader.on_finish_download.connect(self.on_download_finished, QtCore.Qt.QueuedConnection)
+        downloader.start_download_process()
+        download_finished = False
+        while download_finished  == False:
+            print "Downloading {}....".format(path)
+            import time
+            time.sleep(1)
+            file_path_mtd = downloader._dpx.getFileMetadata(path)
+            local_size = 0
+            try:
+                local_size = os.path.getsize(path)
+            except Exception as e:
+                print e, "problem getting the size of file: %s"%(path)
+            if local_size and int(local_size) == int(file_path_mtd.size):
+                break
 
     def on_download_finished(self):
           self.download_finished  = True
           print self.download_finished, "TERMINA JODER "   
           
     def remote_files (self, path):
-        path = path.replace("P:/bm2/", "P:/BM2/")
+        if path.startswith("P:/"):
+            path = path.replace("P:/BM2", "/work/bm2")
+            path = path.replace("P:/bm2", "/work/bm2")
         raw_metadata = Folder(path).remote_children()
         list_files = []
         for n in range (1, len(raw_metadata)):
-            list_files.append (raw_metadata[n].name)    
+            file = raw_metadata[n].name
+            if file != "_OLD":
+                list_files.append(raw_metadata[n].name)    
         return list_files
             
     def split_fields (self, file_name):
@@ -272,16 +272,3 @@ class MortandoCloth(form, base):
         group = "|" + name_geo[1]
         node_name_group = cmds.group(group, n=name)
         return node_name_group 
-        
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
