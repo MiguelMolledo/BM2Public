@@ -9,6 +9,8 @@ import abcExporterUI as abcExporterUI
 def abcWriter(startFrame,endFrame,description,flags=('uvWrite', 'worldSpace', 'writeVisibility', 'writeUVSets')):
     '''esta funcion 
     '''
+    cmds.loadPlugin('AbcExport')
+
     outName=playblasterFunctions.confirm(path=playblasterFunctions.getPaths(description=description, fileType='abc', prodState='out'), message= 'Ooops, seems there is previous cache for ' + description.capitalize() + '.\nDo you want to overwrite it?')
     
     if outName:
