@@ -22,12 +22,21 @@ def changeRotateOrder(newRotateOrder, *args):
 
 def keyInRange(atributes='all',*args):
     cmds.refresh(suspend=True)
-    start=cmds.playbackOptions(q=True, min=True)
-    end=cmds.playbackOptions(q=True, max=True)
-
+ 
+    gPlayBackSlider = mel.eval('$temp=$gPlayBackSlider')
     selection = cmds.ls(sl=True)
+ 
     if selection:
         
+        if cmds.timeControl(gPlayBackSlider, query=True, rv=True):
+            rangeSelected = cmds.timeControl(gPlayBackSlider, query=True, ra=True)
+            start = int(rangeSelected[0])
+            end = int(rangeSelected[1])
+        
+        else:
+            start=cmds.playbackOptions(q=True, min=True)
+            end=cmds.playbackOptions(q=True, max=True)
+
         keysInFrames=cmds.keyframe(selection, time=(start,end), query=True)
         simplifiedList=[]
 

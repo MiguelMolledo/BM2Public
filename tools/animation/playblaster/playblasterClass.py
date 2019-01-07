@@ -13,6 +13,7 @@ import BM2Public.tools.abcExporter.abcExporterUI as abcExporter
 import BM2Public.tools.abcExporter.abcExporterFunctions as abcExporterFunctions 
 from functools import partial
 
+
 class playblaster(object): 
      
     def __init__(self): 
@@ -165,7 +166,7 @@ class playblaster(object):
         cmds.menuItem(divider=True, dl='Anim Utils')
         cmds.menuItem(label='step curves', image='stepTangent.png', c=playblasterAnimUtils.stepTangents)
         cmds.menuItem(label='auto tangents', image='autoTangent.png', c=playblasterAnimUtils.autoTangents)
-        cmds.menuItem(label='keys selected in range', image='setKeyframe.png', c=playblasterAnimUtils.keyInRange)
+        cmds.menuItem(label='keys selected in range', image='setKeyframe.png', c=partial(playblasterAnimUtils.keyInRange, 'all'))
         cmds.menuItem(label='change rotate order', image='out_holder.png', sm=True)
         cmds.radioMenuItemCollection()
 
@@ -544,14 +545,20 @@ class playblaster(object):
         cmds.setToolTo('moveSuperContext')
 
     def startFrameChange(self,*args):
-        value = cmds.intField('startFrame', q=True, v=True)
-        self.playblasterValues['startFrame'] = value
-        cmds.intField('endFrame', e=True, min=value)
+        startValue = cmds.intField('startFrame', q=True, v=True)
+        endValue = cmds.intField('endFrame', q=True, v=True)
+        if startValue >= endValue: endValue = startValue + 1
+        self.playblasterValues['startFrame'] = startValue
+        self.playblasterValues['endFrame'] = endValue
+        cmds.intField('endFrame', e=True, v= endValue)
 
     def endFrameChange(self,*args):
-        value = cmds.intField('endFrame', q=True, v=True)
-        self.playblasterValues['endFrame'] = value
-        cmds.intField('startFrame', e=True, max=value)
+        endValue = cmds.intField('endFrame', q=True, v=True)
+        startValue = cmds.intField('startFrame', q=True, v=True)
+        if endValue <= startValue: startValue = endValue - 1
+        self.playblasterValues['startFrame'] = startValue
+        self.playblasterValues['endFrame'] = endValue
+        cmds.intField('startFrame', e=True, v= startValue)
 
     def cameraInitState(self):
         '''esta funcion actualiza el estado de los simbolCheckoxs del playblaster cuando cambia la camara en el panel,

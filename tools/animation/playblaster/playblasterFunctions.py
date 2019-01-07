@@ -144,17 +144,54 @@ def createShotgunVersion(shotName, movieFilePath, description, department='Anima
     userInfofilters = [ ['login', 'is', userName] ]
     shotgunUserInfo = sg.find_one('HumanUser', userInfofilters)
 
+
+
+    previousVersionsFilters = [['entity', 'is', {'type': 'Shot', 'id': shotgunShotInfo['id']}],
+              ['sg_task', 'is', {'type': 'Task', 'id': shotgunTaskInfo['id']}],
+              ['user', 'is', {'type': 'HumanUser', 'id': shotgunUserInfo['id']}]
+              ]
+    previousVersionsFields = [
+        'id',
+        'code',
+        'user',
+        ]
+
+    previousVersionsFilterPresets = [ {
+        'preset_name': 'LATEST',
+        'latest_by': 'ENTITIES_CREATED_AT'
+    } ]
+
+    userLatestVersion = sg.find_one('Version', previousVersionsFilters, previousVersionsFields, additional_filter_presets=previousVersionsFilterPresets)
+    if userLatestVersion:
+        versionName=incrementalName(userLatestVersion['code'])
+    else:
+        versionName=os.path.basename(movieFilePath)
+
+
     versionFilters = { 'project': {'type': 'Project','id': shotgunProjectInfo['id']},
                        'description': 'version to review',
                        'sg_status_list': 'rev',
                        'entity': {'type': 'Shot', 'id': shotgunShotInfo['id']},
                        'sg_task': {'type': 'Task', 'id': shotgunTaskInfo['id']},
-                       'code': os.path.basename(movieFilePath),
+                       'code': versionName,
                        'user': {'type': 'HumanUser', 'id': shotgunUserInfo['id']} }
     shotgunVersionInfo = sg.create('Version', versionFilters)
     
     fileUploaded =sg.upload("Version", shotgunVersionInfo['id'], movieFilePath,'sg_uploaded_movie')
  
+
+    relatedNoteFilters = [['subject','contains', 'SEGUIMIENTO AN'],
+                         ['tasks', 'is', {'type': 'Task', 'id': shotgunTaskInfo['id']}]]
+           
+    noteFields = ['id','subject','note_links']
+    relatedNote= sg.find('Note', relatedNoteFilters , noteFields)[0]
+    relatedNote['note_links'].append({'type': 'Version', 'id': shotgunVersionInfo['id'], 'name': versionName})
+
+    noteLinksData= {'note_links':relatedNote['note_links']}
+
+    sg.update('Note',relatedNote['id'],noteLinksData)
+
+
     print 'new version was created on shotgun',
 
  
