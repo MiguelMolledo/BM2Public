@@ -5,7 +5,6 @@ import maya.cmds as cmds
 import playblasterClass 
 from Framework.lib.ext_lib import shotgun_api3 as sapi
 from Framework.plugins.dependency_uploader.uploader_window import UploaderBackgroundWidget 
-from Framework.plugins.file_manager.settings import CustomSettings
 
  
  
@@ -112,24 +111,16 @@ def getShotgunRange():
 
  
 def createShotgunVersion(shotName, movieFilePath, description, department='Animation', shotgunWeb = "https://esdip.shotgunstudio.com", project = 'b&m2'):
-    settings = CustomSettings("BM2", "FileManager")
-    userName=settings["login"]
-    
-    try:
-        loginPassword=settings["password"]
-        sg = sapi.Shotgun(shotgunWeb, 
-                           login=userName, 
-                           password=loginPassword) 
-                           
-        shotgunProjectInfo = sg.find_one("Project", [['name', 'is', project]])  
-    
-    except:
-        loginPassword=settings.value('password').rstrip()
-        sg = sapi.Shotgun(shotgunWeb, 
-                           login=userName, 
-                           password=loginPassword) 
-                           
-        shotgunProjectInfo = sg.find_one("Project", [['name', 'is', project]])  
+
+    settings = jsonPlayblaster().read()
+    userName=settings["loginName"]
+    loginPassword=settings["password"]
+
+    sg = sapi.Shotgun(shotgunWeb, 
+                       login=userName, 
+                       password=loginPassword) 
+                       
+    shotgunProjectInfo = sg.find_one("Project", [['name', 'is', project]])  
         
 
     shotInfoFilters = [ ['project', 'is', {'type': 'Project','id': shotgunProjectInfo['id']}],
@@ -235,6 +226,8 @@ def pipeInfo(path=None):
     else: 
         return None  
  
+
+
 def getPaths(fileType, description=None, prodState='out'): 
     '''esta funcion devuelve la ruta completa de salida de archivos en funcion del parametro prodution State, deberia ser 'out' o 'chk', 
     completa la ruta con el campo description por si se quisiera modificar para cada cache por ejemplo 
@@ -326,6 +319,70 @@ class jsonPlayblaster(jsonEditor):
         self.file_path= os.path.dirname(playblasterClass.__file__)+'/playblasterValues.json' 
  
  
+class loggerWindow(object):
+    
+    def __init__(self):
+        self.jsonData= jsonPlayblaster()
+    
+    def check(self):
+        self.userInfo=self.jsonData.read()
+
+        if self.userInfo['loginName']:
+            return
+        else:
+            self.createWindow()
+
+    def checkWindow(self):
+        if cmds.window('shotgunLogger',ex=True):
+            cmds.deleteUI('shotgunLogger')
+    
+    def createWindow(self):
+        self.checkWindow()
+        windows = cmds.window('shotgunLogger',s=False,wh=[260, 75],tlb=True)
+        cmds.window('shotgunLogger',q=True,wh=True)
+        self.mainLayout=cmds.columnLayout(adj=True)
+        cmds.separator(h=5,p=self.mainLayout,st='none')        
+        cmds.rowColumnLayout( numberOfColumns=2, columnAttach=(3, 'right', 0), columnWidth=[(1, 100), (2, 150)], p= self.mainLayout,adj=2 )
+        cmds.text( label='shotgun User: ' )
+        self.userNameField = cmds.textField('userName')
+        cmds.text(label='shotgun Password: ')
+        self.passwordField = cmds.textField('password')
+        cmds.separator(h=3,p=self.mainLayout,st='none')
+        cmds.button('login', p=self.mainLayout,c=self.login)
+        cmds.separator(h=1,p=self.mainLayout,st='none')
+        self.logingError = cmds.text('loginFailedText', label= "the user name and pasword doesn't match", p= self.mainLayout, vis=False)        
+        cmds.showWindow(windows)
+
+
+    def login(self,*args):
+        userName = cmds.textField(self.userNameField,tx=True,q=True)
+        loginPassword = cmds.textField(self.passwordField,tx=True,q=True)
+        
+        if self.authorizeUser(userName,loginPassword):
+            self.userInfo['loginName']= userName
+            self.userInfo['password']= loginPassword
+            self.jsonData.save(self.userInfo)
+            
+            cmds.deleteUI('shotgunLogger')
+        else:
+            cmds.text(self.logingError, vis=True,e=True)
+            
+
+        
+    def authorizeUser(self,userName,loginPassword):
+        shotgunWeb = "https://esdip.shotgunstudio.com"
+        try:
+            connection = sapi.Shotgun(shotgunWeb, 
+                           login=userName, 
+                           password=loginPassword)
+            userInfofilters = [ ['login', 'is', userName] ]
+            shotgunUserInfo = connection .find_one('HumanUser', userInfofilters)                                                    
+            return True
+
+        except:                       
+            return False
+
+
 ''' 
 esta funcion y la clase que genera un prompt de eleccion no se va a usar finalmente para que siempre se fuerze el pisado de versiones 
 y no va a tener el usuario posibilidad de cambiar el campo partition 
