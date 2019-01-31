@@ -1,7 +1,5 @@
 '''to do: 
 -posibilidad de hacer mas de un image plane y seleccionar cual quieres que te muestre 
--que publique lo videos en su carpeta de dropbox 
--que haga una copia de la escena en su sitio chk 
 ''' 
  
 import maya.cmds as cmds 
@@ -39,7 +37,7 @@ class playblaster(object):
                              } 
  
     def checkWindowAtStartMaya(self): 
-        if cmds.workspaceControl('playblaster', exists=True) and cmds.workspaceControl('playblaster', vis=True, q=True):
+        if cmds.workspaceControl('playblaster', exists=True):
             self.show()
 
     def toggleUI(self):
@@ -328,7 +326,7 @@ class playblaster(object):
         cmds.popupMenu('customPopUp', parent='custom', numberOfItems=1)
         cmds.menuItem(label='set custom path', c=self.customPathSelector, p='customPopUp')
         cmds.radioButton('version2Review', label='Version To Review', sl=False, p=checkLayout, en=True,
-                         cc=partial(self.setPlayblasterValue,'saveOption','version2Review'))
+                         cc=self.version2ReviewOption)
         cmds.symbolButton('rewindCtr', image='timerew.png', p=checkLayout, en=True,
                           c='cmds.currentTime(cmds.playbackOptions(q=True,min=True),e=True)')
         cmds.symbolCheckBox('playCtr', ofi='play_S.png', oni='pause_S.png', p=checkLayout, en=True, v=False,
@@ -357,7 +355,24 @@ class playblaster(object):
         self.checkJob()
         self.refreshPlayblasterWindow()
 
-        #return self.playblasterValues
+
+
+    def version2ReviewOption(self,*args):
+        if cmds.radioButton('version2Review', q=True, sl=True):
+          logwindow= functions.loggerWindow()
+          previousMode = self.getPlayblasterValue('saveOption')
+          self.staticValues = functions.jsonPlayblaster().read()
+
+          if self.staticValues['loginName']:
+              if logwindow.authorizeUser(self.staticValues['loginName'], self.staticValues['password']):
+                  self.setPlayblasterValue('saveOption','version2Review')
+              else:
+                  logwindow.createWindow()
+                  cmds.radioButton(previousMode, sl=True, e=True)
+          else:
+              
+              logwindow.check()
+              cmds.radioButton(previousMode, sl=True, e=True)
 
 
     def getPlayblasterValue(self, item,*args):
